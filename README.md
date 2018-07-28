@@ -9,4 +9,4 @@ It tries to parse help outputs of each command reported by proxmark3.exe, which,
 
 ## Installation
 
-Place PM3UniversalGUI release files https://github.com/burma69/PM3UniversalGUI/tree/master/PM3UniversalGUI/bin/Release into the same folder with proxmark3.exe. Alternatively, you can modify PM3UniversalGUI.exe.config XML file and specify the exact location or proxmark3.exe
+Place PM3UniversalGUI release files https://github.com/burma69/PM3UniversalGUI/tree/master/PM3UniversalGUI/bin/Release into the same folder with proxmark3.exe. Alternatively, you can modify PM3UniversalGUI.exe.config XML file and specify the exact location of proxmark3.exe
