@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("https://github.com/burma69/PM3UniversalGUI/")]
 [assembly: AssemblyProduct("PM3UniversalGUI")]
-[assembly: AssemblyCopyright("Copyright ©  2018")]
+[assembly: AssemblyCopyright("Copyright ©  2018, https://github.com/burma69/PM3UniversalGUI/")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

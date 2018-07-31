@@ -112,6 +112,38 @@ namespace PM3UniversalGUI
             PM3CommandsTree.Nodes[0].Expand();
         }
 
+        //enlarge the control width to fit its contents
+        private void ResizeFit(Control c, int MaxWidthLimit)
+        {           
+            int MaxWidth = TextRenderer.MeasureText(c.Text, c.Font).Width;
+
+            if (c.GetType() == typeof(ComboBox))
+            {
+                foreach (Object o in ((ComboBox)c).Items)
+                {
+                    MaxWidth = Math.Max(MaxWidth, TextRenderer.MeasureText(o.ToString(), c.Font).Width);
+                }
+            }
+
+            foreach (Control child in c.Controls)
+            {
+                int PositionAdjustment = child.Left;
+
+                if (c.GetType() == typeof(FlowLayoutPanel)) PositionAdjustment = 0;
+
+                ResizeFit(child, MaxWidthLimit - 5 - PositionAdjustment);
+                MaxWidth = Math.Max(MaxWidth, child.Width + PositionAdjustment);
+            }
+
+            if (c.GetType() == typeof(FlowLayoutPanel)) return;
+
+            c.Width = Math.Min(MaxWidth, MaxWidthLimit) + 20;
+
+            if (c.GetType() == typeof(TextBox))
+                if (c.Width < 100) c.Width = 100;
+        }
+
+
         private void PM3CommandsTree_AfterSelect(object sender, TreeViewEventArgs e)
         {
             if (e == null || e.Node.Tag == null) return;
@@ -244,12 +276,13 @@ namespace PM3UniversalGUI
                 defaultToolTip.SetToolTip(c, c.Text);
                 c.Tag = i;
                 Container.Tag = i;
-
+               
                 foreach (PM3CommandParamAllowedValue av in p.AllowedValues)
                 {
                     if (c.GetType() == typeof(ComboBox))
-                    ((ComboBox)c).Items.Add(av);
+                        ((ComboBox)c).Items.Add(av);
                 }
+
 
                 PreviousControl = c;
 
@@ -261,6 +294,8 @@ namespace PM3UniversalGUI
                     c.TextChanged += textBox1_TextChanged;
 
             }
+
+            ResizeFit(CommandParamsContainer, 300);
 
         }
 
@@ -293,6 +328,7 @@ namespace PM3UniversalGUI
 
         }
 
+        // In case a control (e.g. textbox) is clicked, we want to make sure the checkboxes/radiobuttons related to it and the group it is in are selected as well
         private void SelectLineage(Control c)
         {
             if (c.GetType() == typeof(FlowLayoutPanel)) return;

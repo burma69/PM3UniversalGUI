@@ -368,6 +368,7 @@ namespace PM3UniversalGUI
             ClientProcess.BeginOutputReadLine();
         }
 
+        //try to parse detailed help output of specific command
         public void ExtractCommandParams(PM3Command cmd)
         {
             Process TmpProcess = new Process();
@@ -387,7 +388,13 @@ namespace PM3UniversalGUI
             }
             else
             {
-                TmpProcess.Kill();
+                try
+                {
+                    TmpProcess.Kill();
+                } catch (Exception e)
+                {
+
+                }
             }
             string Output = t.Result;
 
@@ -512,13 +519,15 @@ namespace PM3UniversalGUI
                 }
             }
 
+            //remove most likely wrongly detected fixed keywords in the beginning of the parameters block
             for (int i = 0; i < cmd.Params.Count; i++)
             {
                 if (cmd.Params[i].ParamType != PM3CommandParam.EParamType.Fixed) break;
+                if (cmd.Params[i].Description != null) break; //highly likely that's a real one
                 cmd.Params.RemoveAt(i);
                 i--;
             }
-
+            //remove most likely wrongly detected fixed keywords in the end of the parameters block
             for (int i = cmd.Params.Count-1; i >= 0; i--)
             {
                 if (cmd.Params[i].ParamType != PM3CommandParam.EParamType.Fixed) break;
@@ -527,7 +536,7 @@ namespace PM3UniversalGUI
         }
 
         
-
+        //load the commands list with basic descriptions
         public async void LoadCommands()
         {
             Process TmpProcess = new Process();
@@ -536,7 +545,9 @@ namespace PM3UniversalGUI
             TmpProcess.StartInfo.UseShellExecute = false;
             TmpProcess.StartInfo.RedirectStandardOutput = true;
 
-            TmpProcess.Start();            
+
+            TmpProcess.Start();
+
 
             string CommandsList = TmpProcess.StandardOutput.ReadToEnd();
 

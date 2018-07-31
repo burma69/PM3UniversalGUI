@@ -30,6 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             this.defaultToolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.btnRun = new System.Windows.Forms.Button();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.btnReloadCommands = new System.Windows.Forms.Button();
             this.PM3CommandsTree = new System.Windows.Forms.TreeView();
@@ -41,7 +42,6 @@
             this.radioButton1 = new System.Windows.Forms.RadioButton();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.btnRun = new System.Windows.Forms.Button();
             this.btnCopy = new System.Windows.Forms.Button();
             this.commandComboBox = new System.Windows.Forms.ComboBox();
             this.ConsoleTextBox = new System.Windows.Forms.RichTextBox();
@@ -56,9 +56,23 @@
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
+            // btnRun
+            // 
+            this.btnRun.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnRun.Location = new System.Drawing.Point(738, 2);
+            this.btnRun.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.btnRun.Name = "btnRun";
+            this.btnRun.Size = new System.Drawing.Size(75, 28);
+            this.btnRun.TabIndex = 17;
+            this.btnRun.Text = "Run";
+            this.defaultToolTip.SetToolTip(this.btnRun, "No COM Port selected");
+            this.btnRun.UseVisualStyleBackColor = true;
+            this.btnRun.Click += new System.EventHandler(this.btnRun_Click);
+            // 
             // splitContainer1
             // 
             this.splitContainer1.Location = new System.Drawing.Point(24, 10);
+            this.splitContainer1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
@@ -67,7 +81,7 @@
             this.splitContainer1.Panel1.Controls.Add(this.PM3CommandsTree);
             this.splitContainer1.Panel1.Controls.Add(this.COMPortBox);
             this.splitContainer1.Size = new System.Drawing.Size(340, 584);
-            this.splitContainer1.SplitterDistance = 311;
+            this.splitContainer1.SplitterDistance = 307;
             this.splitContainer1.TabIndex = 11;
             // 
             // btnReloadCommands
@@ -87,11 +101,12 @@
             this.PM3CommandsTree.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.PM3CommandsTree.HideSelection = false;
             this.PM3CommandsTree.Location = new System.Drawing.Point(10, 34);
             this.PM3CommandsTree.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.PM3CommandsTree.Name = "PM3CommandsTree";
             this.PM3CommandsTree.ShowNodeToolTips = true;
-            this.PM3CommandsTree.Size = new System.Drawing.Size(290, 539);
+            this.PM3CommandsTree.Size = new System.Drawing.Size(286, 539);
             this.PM3CommandsTree.TabIndex = 4;
             this.PM3CommandsTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.PM3CommandsTree_AfterSelect);
             this.PM3CommandsTree.DoubleClick += new System.EventHandler(this.btnRun_Click);
@@ -104,7 +119,7 @@
             this.COMPortBox.Location = new System.Drawing.Point(10, 2);
             this.COMPortBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.COMPortBox.Name = "COMPortBox";
-            this.COMPortBox.Size = new System.Drawing.Size(290, 28);
+            this.COMPortBox.Size = new System.Drawing.Size(286, 28);
             this.COMPortBox.TabIndex = 3;
             this.COMPortBox.Text = "Select COM Port...";
             this.COMPortBox.DropDown += new System.EventHandler(this.COMPortBox_DropDown);
@@ -113,6 +128,7 @@
             // splitContainer2
             // 
             this.splitContainer2.Location = new System.Drawing.Point(385, 12);
+            this.splitContainer2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.splitContainer2.Name = "splitContainer2";
             this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -129,7 +145,7 @@
             this.splitContainer2.Panel2.Controls.Add(this.commandComboBox);
             this.splitContainer2.Panel2.Controls.Add(this.ConsoleTextBox);
             this.splitContainer2.Size = new System.Drawing.Size(825, 582);
-            this.splitContainer2.SplitterDistance = 260;
+            this.splitContainer2.SplitterDistance = 259;
             this.splitContainer2.TabIndex = 16;
             // 
             // CommandDescriptionTextBox
@@ -140,6 +156,7 @@
             this.CommandDescriptionTextBox.Font = new System.Drawing.Font("Trebuchet MS", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.CommandDescriptionTextBox.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
             this.CommandDescriptionTextBox.Location = new System.Drawing.Point(0, 10);
+            this.CommandDescriptionTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.CommandDescriptionTextBox.Name = "CommandDescriptionTextBox";
             this.CommandDescriptionTextBox.Size = new System.Drawing.Size(796, 193);
             this.CommandDescriptionTextBox.TabIndex = 10;
@@ -155,6 +172,7 @@
             this.CommandParamsContainer.BackColor = System.Drawing.SystemColors.ControlDark;
             this.CommandParamsContainer.Controls.Add(this.groupBox1);
             this.CommandParamsContainer.Location = new System.Drawing.Point(0, 209);
+            this.CommandParamsContainer.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.CommandParamsContainer.Name = "CommandParamsContainer";
             this.CommandParamsContainer.Size = new System.Drawing.Size(796, 200);
             this.CommandParamsContainer.TabIndex = 9;
@@ -164,8 +182,10 @@
             this.groupBox1.Controls.Add(this.radioButton1);
             this.groupBox1.Controls.Add(this.textBox1);
             this.groupBox1.Controls.Add(this.checkBox1);
-            this.groupBox1.Location = new System.Drawing.Point(3, 3);
+            this.groupBox1.Location = new System.Drawing.Point(3, 2);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox1.Size = new System.Drawing.Size(267, 161);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
@@ -175,7 +195,8 @@
             // radioButton1
             // 
             this.radioButton1.AutoSize = true;
-            this.radioButton1.Location = new System.Drawing.Point(16, 57);
+            this.radioButton1.Location = new System.Drawing.Point(16, 58);
+            this.radioButton1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.radioButton1.Name = "radioButton1";
             this.radioButton1.Size = new System.Drawing.Size(126, 24);
             this.radioButton1.TabIndex = 3;
@@ -185,7 +206,8 @@
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(97, 87);
+            this.textBox1.Location = new System.Drawing.Point(97, 88);
+            this.textBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(100, 26);
             this.textBox1.TabIndex = 2;
@@ -197,6 +219,7 @@
             // 
             this.checkBox1.AutoSize = true;
             this.checkBox1.Location = new System.Drawing.Point(16, 0);
+            this.checkBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.Size = new System.Drawing.Size(113, 24);
             this.checkBox1.TabIndex = 0;
@@ -204,21 +227,10 @@
             this.checkBox1.UseVisualStyleBackColor = true;
             this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
-            // btnRun
-            // 
-            this.btnRun.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnRun.Location = new System.Drawing.Point(738, 2);
-            this.btnRun.Name = "btnRun";
-            this.btnRun.Size = new System.Drawing.Size(75, 28);
-            this.btnRun.TabIndex = 17;
-            this.btnRun.Text = "Run";
-            this.defaultToolTip.SetToolTip(this.btnRun, "No COM Port selected");
-            this.btnRun.UseVisualStyleBackColor = true;
-            this.btnRun.Click += new System.EventHandler(this.btnRun_Click);
-            // 
             // btnCopy
             // 
-            this.btnCopy.Location = new System.Drawing.Point(8, 3);
+            this.btnCopy.Location = new System.Drawing.Point(8, 2);
+            this.btnCopy.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnCopy.Name = "btnCopy";
             this.btnCopy.Size = new System.Drawing.Size(75, 28);
             this.btnCopy.TabIndex = 16;
@@ -230,7 +242,8 @@
             this.commandComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.commandComboBox.FormattingEnabled = true;
-            this.commandComboBox.Location = new System.Drawing.Point(89, 3);
+            this.commandComboBox.Location = new System.Drawing.Point(89, 2);
+            this.commandComboBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.commandComboBox.Name = "commandComboBox";
             this.commandComboBox.Size = new System.Drawing.Size(643, 28);
             this.commandComboBox.TabIndex = 15;
@@ -248,7 +261,7 @@
             this.ConsoleTextBox.Location = new System.Drawing.Point(0, 36);
             this.ConsoleTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ConsoleTextBox.Name = "ConsoleTextBox";
-            this.ConsoleTextBox.Size = new System.Drawing.Size(813, 271);
+            this.ConsoleTextBox.Size = new System.Drawing.Size(813, 274);
             this.ConsoleTextBox.TabIndex = 11;
             this.ConsoleTextBox.Text = "";
             // 
