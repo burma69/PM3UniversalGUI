@@ -27,6 +27,7 @@ namespace PM3UniversalGUI
             return Result;
         }
 
+        // "aaa bb|c|de f h" -> {"bb", "c", "de"}
         public static string[] SplitNearby(string Text, char[] SplitChars)
         {
             foreach (char SplitChar in SplitChars)

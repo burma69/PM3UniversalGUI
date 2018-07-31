@@ -175,42 +175,53 @@ namespace PM3UniversalGUI
                 Control c = null;
 
                 //if the option should be placed into a group box
-                if (p.OrWithNext || (i > 0 && (cmd.Params[i - 1].OrWithNext))) 
+                if (p.GroupWithNext || (i > 0 && (cmd.Params[i - 1].GroupWithNext))) 
                 {
-                    GroupBox RadioContainer = null;
+                    GroupBox GroupContainer = null;
                     int cTop = 0;
                     //this is the first option in a group -> create a groupbox container
-                    if (i == 0 || (i > 0 && !(cmd.Params[i - 1].OrWithNext)))
+                    if (i == 0 || (i > 0 && !(cmd.Params[i - 1].GroupWithNext)))
                     {
-                        RadioContainer = new System.Windows.Forms.GroupBox();
-                        CommandParamsContainer.Controls.Add(RadioContainer);
+                        GroupContainer = new System.Windows.Forms.GroupBox();
+                        CommandParamsContainer.Controls.Add(GroupContainer);
                         if (p.IsOptional)
                         {
                             CheckBox EnableGroup = new System.Windows.Forms.CheckBox();
                             EnableGroup.Width = EnableGroup.Height;
                             EnableGroup.CheckedChanged += textBox1_TextChanged;
-                            RadioContainer.Controls.Add(EnableGroup);
+                            GroupContainer.Controls.Add(EnableGroup);
                         }
                     }
                     else //continue adding options to the group box created before
                     {
-                        Control PreviousSelector = PreviousControl;
-                        if (PreviousSelector.GetType() != typeof(RadioButton) && PreviousSelector.GetType() != typeof(CheckBox)) PreviousSelector = PreviousControl.Parent;
+                        Control PreviousRow = PreviousControl;
+                        if (PreviousRow.GetType() != typeof(RadioButton) 
+                            && PreviousRow.GetType() != typeof(CheckBox) 
+                            && PreviousRow.GetType() != typeof(Panel))
+                            PreviousRow = PreviousControl.Parent;
 
-                        Control PreviousGroupBox = PreviousSelector.Parent;
+                        Control PreviousGroupBox = PreviousRow.Parent;
                         if (PreviousGroupBox.GetType() != typeof(GroupBox)) PreviousGroupBox = PreviousGroupBox.Parent;
 
-                        RadioContainer = (GroupBox)PreviousGroupBox;
-                        cTop = PreviousSelector.Top + PreviousSelector.Height;
+                        GroupContainer = (GroupBox)PreviousGroupBox;
+                        cTop = PreviousRow.Top + PreviousRow.Height;
                     }
 
-                    Container = new System.Windows.Forms.RadioButton();
+                    if (p.OrWithNext || (i > 0 && (cmd.Params[i - 1].OrWithNext))) // [x|y]
+                    {
+                        Container = new System.Windows.Forms.RadioButton();
+                    }
+                    else //[x <y>]
+                    {
+                        Container = new System.Windows.Forms.Panel();
+                        Container.Height = TextRenderer.MeasureText("^_|", Container.Font).Height * 2;
+                    }
                     Container.Top = cTop; // + Container.Height / 4;
                     if (cTop == 0) Container.Top += Container.Height;
-                    Container.Width = RadioContainer.Width * 9 / 10;
-                    Container.Left = RadioContainer.Width * 1 / 20;
-                    RadioContainer.Controls.Add(Container);
-                    RadioContainer.Height = Container.Top + Container.Height + Container.Height / 4;
+                    Container.Width = GroupContainer.Width * 9 / 10;
+                    Container.Left = GroupContainer.Width * 1 / 20;
+                    GroupContainer.Controls.Add(Container);
+                    GroupContainer.Height = Container.Top + Container.Height + Container.Height / 4;
                 }
 
 
@@ -226,10 +237,19 @@ namespace PM3UniversalGUI
                     }
                 }
 
-                if ((p.ParamType == PM3CommandParam.EParamType.Fixed) &&
-                    ((Container.GetType() == typeof(GroupBox))
-                      || (Container.GetType() == typeof(FlowLayoutPanel)))
+                if ((
+                        (p.ParamType == PM3CommandParam.EParamType.Fixed) 
+                        ||
+                        (p.ParamType == PM3CommandParam.EParamType.Flag && p.GroupWithNext)
                     )
+                    &&
+                    (
+                        (Container.GetType() == typeof(GroupBox))
+                        || 
+                        (Container.GetType() == typeof(FlowLayoutPanel))
+                        ||
+                        (Container.GetType() == typeof(Panel))
+                   ))
                 {
                     c = new System.Windows.Forms.Label();
                     ((Label)c).TextAlign = ContentAlignment.MiddleLeft;

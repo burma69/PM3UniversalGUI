@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("PM3 Universal GUI")]
-[assembly: AssemblyDescription("Proxmark3 automated GUI proxy for proxmark3.exe")]
+[assembly: AssemblyDescription("Automated GUI proxy for proxmark3.exe")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("https://github.com/burma69/PM3UniversalGUI/")]
 [assembly: AssemblyProduct("PM3UniversalGUI")]
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.1.0.0")]
+[assembly: AssemblyFileVersion("1.1.0.0")]

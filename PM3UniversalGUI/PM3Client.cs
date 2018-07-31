@@ -38,8 +38,9 @@ namespace PM3UniversalGUI
         public enum EParamType { Fixed, Flag, Value };
 
         public string Name, Description;
-        public bool IsOptional = false;
-        public bool OrWithNext = false;
+        public bool IsOptional = false; //e.g. [x]
+        public bool OrWithNext = false; //e.g. [x|y]
+        public bool GroupWithNext = false; //e.g. [x <y>]
         public EParamType ParamType = EParamType.Fixed;
 
         public List<PM3CommandParamAllowedValue> AllowedValues = new List<PM3CommandParamAllowedValue>();
@@ -80,6 +81,7 @@ namespace PM3UniversalGUI
 
                 if (UsageString[i] == '<')
                 {
+                    if ((ReadingToken && p.IsOptional) || p.ParamType == PM3CommandParam.EParamType.Fixed) p.GroupWithNext = true;
                     FinishingToken = true;
                     TokenIsValue = true;
                 }
@@ -87,6 +89,7 @@ namespace PM3UniversalGUI
                 if (UsageString[i] == '|' && !TokenIsValue)
                 {
                     p.OrWithNext = true;
+                    p.GroupWithNext = true;
                     FinishingToken = true;                    
                 }
 
@@ -103,8 +106,12 @@ namespace PM3UniversalGUI
                 }
 
                 if (FinishingToken)
-                {                   
-                    if (ReadingToken && p.Name != null) Params.Add(p);
+                {
+                    if (ReadingToken && p.Name != null)
+                    {
+                        p.Name = p.Name.TrimEnd();
+                        if (p.Name != "") Params.Add(p);
+                    }
                     ReadingToken = false;
                     FinishingToken = false;
 
@@ -136,7 +143,11 @@ namespace PM3UniversalGUI
                 }
             }
 
-            if (ReadingToken && p.Name != null) Params.Add(p);
+            if (ReadingToken && p.Name != null)
+            {
+                p.Name = p.Name.TrimEnd();
+                if (p.Name != "") Params.Add(p);
+            }
 
 
 
@@ -178,8 +189,18 @@ namespace PM3UniversalGUI
 
             if (OptionName.StartsWith("[")) OptionName = StringUtils.ExtractBrackets(OptionName, '[', ']');
             else if (OptionName.StartsWith("<")) OptionName = StringUtils.ExtractBrackets(OptionName, '<', '>');
-            else OptionName = OptionName.Substring(0, OptionDescription.IndexOf(' '));
+            else OptionName = OptionName.Substring(0, OptionDescription.IndexOfAny(new char[] { ' ', ':', '-' }));
 
+            for (int i = 0; i < Params.Count; i++)
+            {
+                PM3CommandParam p = Params[i];
+
+                if (p.Name == OptionName && p.Description == null) //full match with expected parameter found -> whatever we see, it is less likely to be one of the allowed values for some other parameter
+                {
+                    RelatedToClean = null;
+                    break;
+                }
+            }
             List<string[]> ValueDescriptions = new List<string[]>();
 
 
@@ -202,7 +223,7 @@ namespace PM3UniversalGUI
             if ((OptionDescription.Split('|').Length > 2))
             {
                 if (RelatedToClean == null) RelatedToClean = OptionName;
-                string[] ValueDescriptionTmp = OptionDescription.Split('|');
+                string[] ValueDescriptionTmp = StringUtils.SplitNearby(OptionDescription, new char[] { '|' });
 
                 foreach (string s in ValueDescriptionTmp)
                 {
@@ -222,20 +243,25 @@ namespace PM3UniversalGUI
             
             int MatchingId = -1;
 
+            //trying to find the exact match of description with parameter name mentioned in the usage
             if (MatchingId < 0)
                 for (int i = 0; i < Params.Count; i++)
                 {
                     PM3CommandParam p = Params[i];
 
-                    if (p.Name == OptionName || (RelatedToClean != null && p.Name == RelatedToClean))
+                    if (p.Name == OptionName ||
+                        (RelatedToClean != null && p.Name == RelatedToClean)) //maybe it's not the parameter, but a description of allowed value of some parameter
                     {
                         MatchingId = i;
                         break;
                     }
                 }
 
-            
-            if (MatchingId < 0 && OptionName.IndexOf(' ') > 0) //second chance by looking up partial match
+
+
+
+            //second chance by looking up partial match
+            if (MatchingId < 0 && OptionName.IndexOf(' ') > 0) 
             {
                 string OptionNamePartial = OptionName.Substring(0, OptionName.IndexOf(' '));
 
