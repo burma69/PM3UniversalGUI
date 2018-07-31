@@ -189,7 +189,7 @@ namespace PM3UniversalGUI
 
             if (OptionName.StartsWith("[")) OptionName = StringUtils.ExtractBrackets(OptionName, '[', ']');
             else if (OptionName.StartsWith("<")) OptionName = StringUtils.ExtractBrackets(OptionName, '<', '>');
-            else OptionName = OptionName.Substring(0, OptionDescription.IndexOfAny(new char[] { ' ', ':', '-' }, 1));
+            else OptionName = OptionName.Substring(0, OptionDescription.IndexOfAny(new char[] { ' ', ':' }));
 
             for (int i = 0; i < Params.Count; i++)
             {
