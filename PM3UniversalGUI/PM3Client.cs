@@ -397,6 +397,8 @@ namespace PM3UniversalGUI
         //try to parse detailed help output of specific command
         public void ExtractCommandParams(PM3Command cmd)
         {
+
+
             Process TmpProcess = new Process();
             TmpProcess.StartInfo.FileName = PM3FileName;
             TmpProcess.StartInfo.Arguments = "-c \"" + cmd.Command + " h\"";
@@ -565,6 +567,11 @@ namespace PM3UniversalGUI
         //load the commands list with basic descriptions
         public async void LoadCommands()
         {
+            if (!File.Exists(PM3FileName))
+            {
+                throw new System.ArgumentException("Cannot find PM3 console client \"" + PM3FileName + "\". Please check that this file exists or provide an alternative location in PM3UniversalGUI.exe.config PM3ClientFilename setting.", "PM3ClientFilename");
+            }
+
             Process TmpProcess = new Process();
             TmpProcess.StartInfo.FileName = PM3FileName; // Specify exe name.
             TmpProcess.StartInfo.Arguments = "-h";
