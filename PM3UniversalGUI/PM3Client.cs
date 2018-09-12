@@ -363,6 +363,7 @@ namespace PM3UniversalGUI
         public Process ClientProcess = new Process();
         public List<PM3Command> Commands = new List<PM3Command>();
         public string PM3FileName;
+        public string PortName;
 
         public PM3Client(string PM3FileName)
         {
@@ -379,6 +380,7 @@ namespace PM3UniversalGUI
 
         public void InitClient(string PortName)
         {
+            this.PortName = PortName;
             ClientProcess.StartInfo.FileName = PM3FileName; // Specify exe name.
             ClientProcess.StartInfo.Arguments = PortName +" -f";
             ClientProcess.StartInfo.UseShellExecute = false;
@@ -392,6 +394,15 @@ namespace PM3UniversalGUI
             ClientProcess.Start();
 
             ClientProcess.BeginOutputReadLine();
+        }
+
+        public void StopClient()
+        {
+            ClientProcess.CancelOutputRead();
+            ClientProcess.Kill();
+            ClientProcess.Dispose();
+
+            ClientProcess = new Process();
         }
 
         //try to parse detailed help output of specific command

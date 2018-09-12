@@ -31,17 +31,29 @@ namespace PM3UniversalGUI
 
         public void OnDataReceivedEventHandler(object sender, DataReceivedEventArgs e)
         {
-            int i = e.Data.IndexOf("proxmark3>");
-            if (i < 0) i = e.Data.IndexOf("pm3 -->");
+            string[] Lines = e.Data.Split(new string[] { "\r\n" }, StringSplitOptions.None);
 
-            if (i < 0)
-                AppendText(ConsoleTextBox, ConsoleTextBox.ForeColor, e.Data + "\r\n");
-            else AppendText(ConsoleTextBox, Color.Goldenrod, e.Data + "\r\n", true);
+            foreach (string s in Lines)
+            {
+                int i = s.IndexOf("proxmark3>");
+                if (i < 0) i = s.IndexOf("pm3 -->");
+
+                if (i < 0)
+                    AppendText(ConsoleTextBox, ConsoleTextBox.ForeColor, s + "\r\n");
+                else AppendText(ConsoleTextBox, Color.Goldenrod, s + "\r\n", true);
+            }
         }
 
 
         private void COMPortBox_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (Program.PM3.PortName == COMPortBox.SelectedItem.ToString()) return;
+
+            if (Program.PM3.IsRunning())
+            {
+                Program.PM3.StopClient();
+            }
+
             Program.PM3.InitClient(COMPortBox.SelectedItem.ToString());
             Program.PM3.ClientProcess.OutputDataReceived += OnDataReceivedEventHandler;
             Program.PM3.StartClient();
@@ -324,7 +336,17 @@ namespace PM3UniversalGUI
             if (!Program.PM3.IsRunning())
             {
                 COMPortBox.Focus();
-                return;
+
+                if (COMPortBox.Items.Count == 0)
+                {
+                    COMPortBox_DropDown(null, null);
+                }
+
+                if (COMPortBox.Items.Count == 1)
+                {
+                    COMPortBox.SelectedIndex = 0;
+                }
+                if (!Program.PM3.IsRunning()) return;
             }
 
             Program.PM3.ClientProcess.StandardInput.WriteLine(commandComboBox.Text);
