@@ -461,7 +461,8 @@ namespace PM3UniversalGUI
                         Block = 3;
                         continue;
                     }
-                    if (line.TrimStart().IndexOf("Usage:", StringComparison.CurrentCultureIgnoreCase) == 0)
+                    if (line.TrimStart().IndexOf("Usage:", StringComparison.CurrentCultureIgnoreCase) == 0 ||
+                        line.TrimStart().IndexOf("Syntax:", StringComparison.CurrentCultureIgnoreCase) == 0)
                     {
                         Block = 0;
                     }
@@ -479,7 +480,12 @@ namespace PM3UniversalGUI
 
                     if (Block == 0) //usage
                     {
-                        string UsageString = line.Replace("Usage:", "").Replace("\t", "").Trim();
+                        string UsageString = line.Replace("\t", "").Trim();
+                        foreach (string ReplaceKeyword in new string[] { "Usage:", "Syntax:" })
+                        {
+                            if (UsageString.IndexOf(ReplaceKeyword, StringComparison.CurrentCultureIgnoreCase) >= 0)
+                                UsageString = UsageString.Remove(UsageString.IndexOf(ReplaceKeyword, StringComparison.CurrentCultureIgnoreCase), ReplaceKeyword.Length);
+                        }
                         if (UsageString.Length > 0)
                         {
                             cmd.Usage += UsageString + "\r\n";
