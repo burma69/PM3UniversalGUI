@@ -582,7 +582,7 @@ namespace PM3UniversalGUI
 
         
         //load the commands list with basic descriptions
-        public async void LoadCommands()
+        public async void LoadCommands(int version = 3)
         {
             if (!File.Exists(PM3FileName))
             {
@@ -591,7 +591,7 @@ namespace PM3UniversalGUI
 
             Process TmpProcess = new Process();
             TmpProcess.StartInfo.FileName = PM3FileName; // Specify exe name.
-            TmpProcess.StartInfo.Arguments = "-h";
+            if (version >= 4) { TmpProcess.StartInfo.Arguments = "-t"; } else TmpProcess.StartInfo.Arguments = "-h";
             TmpProcess.StartInfo.UseShellExecute = false;
             TmpProcess.StartInfo.RedirectStandardOutput = true;
 

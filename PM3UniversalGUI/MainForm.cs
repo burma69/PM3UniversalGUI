@@ -93,7 +93,8 @@ namespace PM3UniversalGUI
 
         private void btnReloadCommands_Click(object sender, EventArgs e)
         {
-            Program.PM3.LoadCommands();
+            Program.PM3.LoadCommands(3);
+            if (Program.PM3.Commands.Count == 0) Program.PM3.LoadCommands(4);
 
             PM3CommandsTree.Nodes.Clear();
             PM3CommandsTree.Nodes.Add("PM3");
