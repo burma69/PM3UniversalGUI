@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.IO.Ports;
 using System.Diagnostics;
@@ -358,12 +359,18 @@ namespace PM3UniversalGUI
         }
     }
 
+
     class PM3Client
     {
+        public ConsoleAutomator ClientProcessConsoleAutomator;
         public Process ClientProcess = new Process();
         public List<PM3Command> Commands = new List<PM3Command>();
         public string PM3FileName;
         public string PortName;
+        public int Version = 3;
+
+        private StringBuilder CMDBuffer = new StringBuilder();
+        private ManualResetEvent EndOfOutputEvent = new ManualResetEvent(false);
 
         public PM3Client(string PM3FileName)
         {
@@ -382,64 +389,126 @@ namespace PM3UniversalGUI
         {
             this.PortName = PortName;
             ClientProcess.StartInfo.FileName = PM3FileName; // Specify exe name.
-            ClientProcess.StartInfo.Arguments = PortName +" -f";
+            ClientProcess.StartInfo.Arguments = PortName + " -f";
             ClientProcess.StartInfo.UseShellExecute = false;
             ClientProcess.StartInfo.RedirectStandardOutput = true;
-            ClientProcess.StartInfo.RedirectStandardInput = true;
+            ClientProcess.StartInfo.RedirectStandardInput = true;            
             ClientProcess.StartInfo.CreateNoWindow = true;
         }
+
 
         public void StartClient()
         {
             ClientProcess.Start();
 
-            ClientProcess.BeginOutputReadLine();
+            ClientProcessConsoleAutomator = new ConsoleAutomator(ClientProcess.StandardInput, ClientProcess.StandardOutput);
+            ClientProcessConsoleAutomator.StartCapture();
+
+            //ClientProcess.BeginOutputReadLine();
         }
 
         public void StopClient()
         {
-            ClientProcess.CancelOutputRead();
-            ClientProcess.Kill();
+            //ClientProcess.CancelOutputRead();
+
+            ClientProcessConsoleAutomator.StopCapture();
+            if (!ClientProcess.HasExited) ClientProcess.Kill();
             ClientProcess.Dispose();
 
             ClientProcess = new Process();
         }
 
+
+        private void ProcessConsoleOutput (string Output)
+        {
+            CMDBuffer.Append(Output);
+
+
+            if (Output.TrimEnd().EndsWith("proxmark3>") || Output.TrimEnd().EndsWith("pm3 -->"))
+                EndOfOutputEvent.Set(); //in case command prompt returned terminate output reading
+        }
+
+
+
+        private void OnAutomatorStandardInputRead(object sender, ConsoleInputReadEventArgs e)
+        {
+            if (!String.IsNullOrEmpty(e.Input)) ProcessConsoleOutput(e.Input);
+            else EndOfOutputEvent.Set();
+        }
+        private void OnDataReceivedEventHandler(object sender, DataReceivedEventArgs e)
+        {
+            if (!String.IsNullOrEmpty(e.Data)) ProcessConsoleOutput(e.Data + "\r\n");
+            else EndOfOutputEvent.Set();
+        }
+
+        private string CaptureOutput(string cmd)
+        {
+            CMDBuffer.Clear();
+            /*
+            ClientProcess.OutputDataReceived += OnDataReceivedEventHandler;            
+            ClientProcess.BeginOutputReadLine();
+            */
+
+            ClientProcessConsoleAutomator.StandardInputRead += OnAutomatorStandardInputRead;
+
+            ClientProcess.StandardInput.WriteLine(cmd);
+
+            EndOfOutputEvent.Reset();
+            EndOfOutputEvent.WaitOne(Int32.Parse(ConfigurationManager.AppSettings["ConsoleDumpTimeout"]));
+            
+            ClientProcessConsoleAutomator.StandardInputRead -= OnAutomatorStandardInputRead;
+
+            /*
+            ClientProcess.OutputDataReceived -= OnDataReceivedEventHandler;
+            ClientProcess.CancelOutputRead();
+            */
+
+            return CMDBuffer.ToString();
+        }
+
         //try to parse detailed help output of specific command
         public void ExtractCommandParams(PM3Command cmd)
         {
+            string Output = "";
 
-
-            Process TmpProcess = new Process();
-            TmpProcess.StartInfo.FileName = PM3FileName;
-            TmpProcess.StartInfo.Arguments = "-c \"" + cmd.Command + " h\"";
-            TmpProcess.StartInfo.UseShellExecute = false;            
-            TmpProcess.StartInfo.RedirectStandardOutput = true;
-            TmpProcess.StartInfo.CreateNoWindow = true;
-
-            TmpProcess.Start();
-
-            Task<string> t = TmpProcess.StandardOutput.ReadToEndAsync();
-            Task t2 = Task.WhenAny(t, Task.Delay(Int32.Parse(ConfigurationManager.AppSettings["ConsoleDumpTimeout"]))).GetAwaiter().GetResult();
-            if (t2.Id == t.Id)
+            if (Version < 4) //start a new process to fetch command parameters in PM3
             {
-                // task completed within timeout
-            }
-            else
-            {
-                try
-                {
-                    TmpProcess.Kill();
-                } catch (Exception e)
-                {
+                Process TmpProcess = new Process();
+                TmpProcess.StartInfo.FileName = PM3FileName;
+                TmpProcess.StartInfo.Arguments = "-c \"" + cmd.Command + " h\"";
+                TmpProcess.StartInfo.UseShellExecute = false;
+                TmpProcess.StartInfo.RedirectStandardOutput = true;
+                TmpProcess.StartInfo.CreateNoWindow = true;
 
+                TmpProcess.Start();
+
+                Task<string> t = TmpProcess.StandardOutput.ReadToEndAsync();
+                Task t2 = Task.WhenAny(t, Task.Delay(Int32.Parse(ConfigurationManager.AppSettings["ConsoleDumpTimeout"]))).GetAwaiter().GetResult();
+                if (t2.Id == t.Id)
+                {
+                    // task completed within timeout
                 }
+                else
+                {
+                    try
+                    {
+                        TmpProcess.Kill();
+                    }
+                    catch (Exception e)
+                    {
+
+                    }
+                }
+                Output = t.Result;
+            } else
+            {
+                Output = CaptureOutput(cmd.Command + " h"); //get help output for the command executed in already running client console
             }
-            string Output = t.Result;
 
             cmd.Usage = null;
             cmd.Examples = null;
             cmd.DescriptionFull = null;
+            cmd.Options = null;
             bool OptionsBlockExpected = Output.IndexOf("Options:") > 0;
 
             using (StringReader sr = new StringReader(Output))
@@ -589,6 +658,7 @@ namespace PM3UniversalGUI
                 throw new System.ArgumentException("Cannot find PM3 console client \"" + PM3FileName + "\". Please check that this file exists or provide an alternative location in PM3UniversalGUI.exe.config PM3ClientFilename setting.", "PM3ClientFilename");
             }
 
+            Version = version;
             Process TmpProcess = new Process();
             TmpProcess.StartInfo.FileName = PM3FileName; // Specify exe name.
             if (version >= 4) { TmpProcess.StartInfo.Arguments = "-t"; } else TmpProcess.StartInfo.Arguments = "-h";

@@ -27,11 +27,9 @@ namespace PM3UniversalGUI
             btnReloadCommands_Click(this, null);
         }
 
-
-
-        public void OnDataReceivedEventHandler(object sender, DataReceivedEventArgs e)
+        public void ProcessConsoleOutput(string Output)
         {
-            string[] Lines = e.Data.Split(new string[] { "\r\n" }, StringSplitOptions.None);
+            string[] Lines = Output.Split(new string[] { "\r\n" }, StringSplitOptions.None);
 
             foreach (string s in Lines)
             {
@@ -44,9 +42,30 @@ namespace PM3UniversalGUI
             }
         }
 
+        public void OnAutomatorStandardInputRead(object sender, ConsoleInputReadEventArgs e)
+        {
+            if (String.IsNullOrEmpty(e.Input)) return;
+
+            ProcessConsoleOutput(e.Input);
+        }
+
+        public void OnDataReceivedEventHandler(object sender, DataReceivedEventArgs e)
+        {
+            if (String.IsNullOrEmpty(e.Data)) return;
+
+            ProcessConsoleOutput(e.Data + "\r\n");            
+        }
+
 
         private void COMPortBox_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (COMPortBox.SelectedItem == null)
+            {
+                Program.PM3.PortName = "";
+                Program.PM3.StopClient();
+                return;
+            }
+
             if (Program.PM3.PortName == COMPortBox.SelectedItem.ToString()) return;
 
             if (Program.PM3.IsRunning())
@@ -166,7 +185,35 @@ namespace PM3UniversalGUI
 
             commandComboBox.Text = cmd.Command;
 
-            if (cmd.DescriptionFull == null) Program.PM3.ExtractCommandParams(cmd);
+            if (cmd.DescriptionFull == null && cmd.Params.Count == 0 && cmd.Usage == null)
+            {
+                if (Program.PM3.Version >= 4)
+                {
+                    if (!EnsurePM3isRunning()) return;
+
+                    Program.PM3.ClientProcessConsoleAutomator.StandardInputRead -= OnAutomatorStandardInputRead;
+                    /*
+                    Program.PM3.ClientProcess.OutputDataReceived -= OnDataReceivedEventHandler;
+                    Program.PM3.ClientProcess.CancelOutputRead();
+                    */
+                }
+
+                Program.PM3.ExtractCommandParams(cmd);
+
+                if (Program.PM3.Version >= 4)
+                {
+                    if (Program.PM3.IsRunning())
+                    {
+                        Program.PM3.ClientProcessConsoleAutomator.StandardInputRead += OnAutomatorStandardInputRead;
+                        /*   
+                        Program.PM3.ClientProcess.OutputDataReceived += OnDataReceivedEventHandler;
+                        Program.PM3.ClientProcess.BeginOutputReadLine();
+                        */
+                    }
+
+                    if (!EnsurePM3isRunning()) return;                    
+                }
+            }
 
             CommandParamsContainer.Controls.Clear();
 
@@ -332,7 +379,7 @@ namespace PM3UniversalGUI
 
         }
 
-        private void btnRun_Click(object sender, EventArgs e)
+        private bool EnsurePM3isRunning()
         {
             if (!Program.PM3.IsRunning())
             {
@@ -341,14 +388,21 @@ namespace PM3UniversalGUI
                 if (COMPortBox.Items.Count == 0)
                 {
                     COMPortBox_DropDown(null, null);
-                }
+    }
 
                 if (COMPortBox.Items.Count == 1)
                 {
+                    if (COMPortBox.SelectedIndex == 0) COMPortBox.SelectedIndex = -1;
                     COMPortBox.SelectedIndex = 0;
                 }
-                if (!Program.PM3.IsRunning()) return;
             }
+
+            return Program.PM3.IsRunning();
+        }
+
+        private void btnRun_Click(object sender, EventArgs e)
+        {
+            if (!EnsurePM3isRunning()) return;
 
             Program.PM3.ClientProcess.StandardInput.WriteLine(commandComboBox.Text);
             if (commandComboBox.Items.IndexOf(commandComboBox.Text) < 0)
