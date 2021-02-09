@@ -1,0 +1,84 @@
+- name: Setup Java JDK
+  uses: actions/setup-java@v1.4.3
+  with:
+    # The Java version to make available on the path. Takes a whole or semver Java version, or 1.x syntax (e.g. 1.8 => Java 8.x). Early access versions can be specified in the form of e.g. 14-ea, 14.0.0-ea, or 14.0.0-ea.28
+    java-version: 
+    # The package type (jre, jdk, jdk+fx)
+    java-package: # optional, default is jdk
+    # The architecture (x86, x64) of the package.
+    architecture: # optional, default is x64
+    # Path to where the compressed JDK is located. The path could be in your source repository or a local path on the agent.
+    jdkFile: # optional
+    # ID of the distributionManagement repository in the pom.xml file. Default is `github`
+    server-id: # optional, default is github
+    # Environment variable name for the username for authentication to the Apache Maven repository. Default is $GITHUB_ACTOR
+    server-username: # optional, default is GITHUB_ACTOR
+    # Environment variable name for password or token for authentication to the Apache Maven repository. Default is $GITHUB_TOKEN
+    server-password: # optional, default is GITHUB_TOKEN
+    # Path to where the settings.xml file will be written. Default is ~/.m2.
+    settings-path: # optional
+    # GPG private key to import. Default is empty string.
+    gpg-private-key: # optional
+    # Environment variable name for the GPG private key passphrase. Default is $GPG_PASSPHRASE.
+    gpg-passphrase: # optional
+# ******** NOTE ********
+# We have attempted to detect the languages in your repository. Please check
+# the `language` matrix defined below to confirm you have the correct set of
+# supported CodeQL languages.
+#
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ master ]
+  schedule:
+    - cron: '15 5 * * 3'
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'csharp' ]
+        # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python' ]
+        # Learn more:
+        # https://docs.github.com/en/free-pro-team@latest/github/finding-security-vulnerabilities-and-errors-in-your-code/configuring-code-scanning#changing-the-languages-that-are-analyzed
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    # Initializes the CodeQL tools for scanning.
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v1
+      with:
+        languages: ${{ matrix.language }}
+        # If you wish to specify custom queries, you can do so here or in a config file.
+        # By default, queries listed here will override any specified in a config file.
+        # Prefix the list here with "+" to use these queries and those in the config file.
+        # queries: ./path/to/local/query, your-org/your-repo/queries@main
+
+    # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
+    # If this step fails, then you should remove it and run the build manually (see below)
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v1
+
+    # ℹ️ Command-line programs to run using the OS shell.
+    # 📚 https://git.io/JvXDl
+
+    # ✏️ If the Autobuild fails above, remove it and uncomment the following three lines
+    #    and modify them (or add more) to build your code if your project
+    #    uses a compiled language
+
+    #- run: |
+    #   make bootstrap
+    #   make release
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v1
